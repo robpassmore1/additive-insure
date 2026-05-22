@@ -1,0 +1,20 @@
+{
+  "event": {
+    "dailyDowntimeCost": 350000,
+    "action": "Deploy temporary flood barriers at loading bay",
+    "actionCost": 25000,
+    "leadTimes": {
+      "p10": 150,
+      "p50": 240,
+      "p90": 330
+    },
+    "minimumActionTime": 120,
+    "predictedLossWithoutAction": 3500000,
+    "predictedLossWithAction": 500000,
+    "grossAvoidedLoss": 3000000,
+    "retainedLossAvoided": 3000000,
+    "coveragePosition": "Inside flood excess",
+    "hydrologicalCausality": "Probable",
+    "evidenceConfidence": "Probable avoided loss"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "site": {
+    "name": "Coca-Cola-style FMCG Factory"
+  },
+  "policy": {
+    "propertySumInsured": 50000000,
+    "businessInterruptionSumInsured": 75000000,
+    "floodExcess": 4000000
+  }
+}
