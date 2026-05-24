@@ -37,7 +37,7 @@ function MainLayout() {
       <div className="sidebar">
         <div className="sidebar-brand">
           <div className="sidebar-brand-name">Additive Insure</div>
-          <div className="sidebar-brand-sub">Version 1.1 · Demonstrator</div>
+          <div className="sidebar-brand-sub">Version 1.2 · Place-Based ALT</div>
         </div>
 
         {NAV_ITEMS.map(group => (

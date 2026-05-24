@@ -15,6 +15,59 @@
     "retainedLossAvoided": 3000000,
     "coveragePosition": "Inside flood excess",
     "hydrologicalCausality": "Probable",
-    "evidenceConfidence": "Probable avoided loss"
+    "evidenceConfidence": "Probable avoided loss",
+    "modelCard": {
+      "modelBasis": "2D Hydraulic Pathway Analysis (survey-informed, not operationally validated)",
+      "inputs": "Upstream gauge height, local rainfall telemetry node, perimeter ditch status",
+      "confidence": "Medium-High (hydrological uncertainty applies)",
+      "limitations": "Does not model secondary drainage backing or dynamic surface ponding",
+      "approvedClaimLevel": "Deductible erosion tracking only"
+    },
+    "actionCard": {
+      "location": "Sector 4 Loading Bay (low point threshold)",
+      "owner": "Facilities Manager / Site Response Team",
+      "timeRequired": 120,
+      "actionCost": 25000,
+      "evidenceRequired": "Pre-deployment survey photos, perimeter seal sensor logs, time-stamped locking pin confirmation",
+      "p10Result": "150 min (30 min buffer above min. required time)"
+    },
+    "driverTelemetries": {
+      "IDLE": {
+        "river": { "value": "1.2m", "status": "Normal", "color": "var(--accent-blue-light)" },
+        "rainfall": { "value": "0.5 mm/h", "status": "Normal", "color": "var(--accent-blue-light)" },
+        "drainage": { "value": "Dry", "status": "Normal", "color": "var(--text-muted)" },
+        "loadingBay": { "value": "Dry", "status": "Normal", "color": "var(--text-muted)" }
+      },
+      "RISING": {
+        "river": { "value": "2.8m", "status": "Rising", "color": "var(--accent-blue)" },
+        "rainfall": { "value": "4.2 mm/h", "status": "Elevated", "color": "var(--accent-blue)" },
+        "drainage": { "value": "Dry", "status": "Normal", "color": "var(--text-muted)" },
+        "loadingBay": { "value": "Dry", "status": "Normal", "color": "var(--text-muted)" }
+      },
+      "WATCH": {
+        "river": { "value": "3.9m", "status": "High (Watch Level)", "color": "var(--color-warning-text)" },
+        "rainfall": { "value": "12.8 mm/h", "status": "Heavy Rain", "color": "var(--color-warning-text)" },
+        "drainage": { "value": "0.8m", "status": "Ditch Ingress Active", "color": "var(--color-warning-text)" },
+        "loadingBay": { "value": "Dry", "status": "Normal", "color": "var(--text-muted)" }
+      },
+      "ACTION": {
+        "river": { "value": "4.8m", "status": "Critical Breach Height", "color": "var(--color-alert-border)" },
+        "rainfall": { "value": "24.5 mm/h", "status": "Extreme Downpour", "color": "var(--color-alert-border)" },
+        "drainage": { "value": "1.5m", "status": "Perimeter Overflowing", "color": "var(--color-alert-border)" },
+        "loadingBay": { "value": "0.2m ingress", "status": "Action Required", "color": "var(--color-alert-border)" }
+      },
+      "ACTION_TAKEN": {
+        "river": { "value": "4.8m", "status": "Critical Breach Height", "color": "var(--color-alert-border)" },
+        "rainfall": { "value": "24.5 mm/h", "status": "Extreme Downpour", "color": "var(--color-alert-border)" },
+        "drainage": { "value": "1.5m", "status": "Perimeter Overflowing", "color": "var(--color-alert-border)" },
+        "loadingBay": { "value": "0.2m ingress (blocked)", "status": "Barrier Active", "color": "var(--color-success-border)" }
+      },
+      "RESOLVED": {
+        "river": { "value": "1.8m", "status": "Receding", "color": "var(--accent-blue-light)" },
+        "rainfall": { "value": "0.2 mm/h", "status": "Normal", "color": "var(--text-muted)" },
+        "drainage": { "value": "0.3m", "status": "Receding", "color": "var(--text-muted)" },
+        "loadingBay": { "value": "Dry (Defended)", "status": "Resolved", "color": "var(--color-success-border)" }
+      }
+    }
   }
 }
