@@ -1,0 +1,60 @@
+{
+  "objects": [
+    {
+      "id": "river",
+      "type": "sensor",
+      "role": "Lead-Time Signal",
+      "name": "Upstream Stage Sensor",
+      "coord": { "lat": 52.9250, "lng": -1.4778 },
+      "description": "Measures upstream river level. Provides early warning lead-time trigger."
+    },
+    {
+      "id": "rainfall",
+      "type": "sensor",
+      "role": "Hazard Driver",
+      "name": "Rainfall Telemetry Gauge",
+      "coord": { "lat": 52.9248, "lng": -1.4750 },
+      "description": "Measures local precipitative intensity. Drives overland surface ponding."
+    },
+    {
+      "id": "drainage",
+      "type": "pathway_node",
+      "role": "Pathway Activation",
+      "name": "Perimeter Ditch Ingress sensor",
+      "coord": { "lat": 52.9236, "lng": -1.4750 },
+      "description": "Monitors boundary ditch levels and yard low-point water backing."
+    },
+    {
+      "id": "loadingBay",
+      "type": "impact_point",
+      "role": "Asset Impact Point",
+      "name": "Loading Bay Ingress Sensor",
+      "coord": { "lat": 52.9238, "lng": -1.4742 },
+      "description": "Monitors critical flood height threshold at facility entrance."
+    },
+    {
+      "id": "barrier",
+      "type": "mitigation_point",
+      "role": "Mitigation Point",
+      "name": "Defensive Barrier Location",
+      "coord": { "lat": 52.9238, "lng": -1.4742 },
+      "description": "Location of temporary flood barriers to block loading bay ingress."
+    },
+    {
+      "id": "substation",
+      "type": "asset",
+      "role": "Exposure at Risk",
+      "name": "Electrical Substation",
+      "coord": { "lat": 52.9242, "lng": -1.4740 },
+      "description": "Facility power transformer. Severe operational impact if flooded."
+    },
+    {
+      "id": "stockArea",
+      "type": "asset",
+      "role": "Exposure at Risk",
+      "name": "Finished Stock Area",
+      "coord": { "lat": 52.9234, "lng": -1.4738 },
+      "description": "Primary packaging and warehousing floor. High inventory damage value."
+    }
+  ]
+}

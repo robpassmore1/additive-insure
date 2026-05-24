@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useSimulation } from '../SimulationContext';
+import SiteContextMap from './SiteContextMap';
 import siteData from '../../../fixtures/site.json';
 import eventData from '../../../fixtures/event.json';
 
@@ -11,7 +12,7 @@ export default function SiteEventView() {
   const policy = siteData.policy;
   const ev = eventData.event;
 
-  // Selected driver card state
+  // Selected driver card / marker state
   const [selectedCard, setSelectedCard] = useState('rainfall');
   const [userOverride, setUserOverride] = useState(false);
   const prevPhaseRef = useRef(phase);
@@ -59,13 +60,6 @@ export default function SiteEventView() {
     RESOLVED: 'badge--resolved'
   }[phase];
 
-  // SVG states and classes
-  const riverClass = phase === 'IDLE' ? '' : phase === 'RISING' ? 'rising' : phase === 'WATCH' ? 'watch' : (phase === 'ACTION' || phase === 'ACTION_TAKEN') ? 'action' : 'resolved';
-  const ditchClass = phase === 'WATCH' ? 'watch' : (phase === 'ACTION' || phase === 'ACTION_TAKEN') ? 'action' : phase === 'RESOLVED' ? 'resolved' : '';
-  const yardClass = phase === 'WATCH' ? 'watch' : (phase === 'ACTION' || phase === 'ACTION_TAKEN') ? 'action' : phase === 'RESOLVED' ? 'resolved' : '';
-  const assetClass = (phase === 'ACTION') ? 'critical' : (phase === 'ACTION_TAKEN' || phase === 'RESOLVED') ? 'defended' : '';
-  const barrierClass = (phase === 'ACTION_TAKEN' || phase === 'RESOLVED') ? 'deployed' : '';
-
   // Get active driver telemetries from fixture
   const telemetries = ev.driverTelemetries[phase] || ev.driverTelemetries['IDLE'];
 
@@ -100,106 +94,13 @@ export default function SiteEventView() {
       {/* Split-pane Dashboard */}
       <div className="dashboard-split">
         
-        {/* Left Pane: Interactive SVG Schematic */}
+        {/* Left Pane: Map Provider Switcher */}
         <div className="map-pane">
-          <div className="schematic-box">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div className="card-label" style={{ margin: 0 }}>Interactive Site Schematic (Place-Based)</div>
-              <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Click markers to explore rationale</div>
-            </div>
-            
-            <svg viewBox="0 0 280 180" className="schematic-svg">
-              <rect width="280" height="180" className="map-bg" />
-              
-              {/* Grid overlay */}
-              <g stroke="rgba(255,255,255,0.02)" strokeWidth="0.5" strokeDasharray="2 4">
-                <line x1="40" y1="0" x2="40" y2="180" />
-                <line x1="80" y1="0" x2="80" y2="180" />
-                <line x1="120" y1="0" x2="120" y2="180" />
-                <line x1="160" y1="0" x2="160" y2="180" />
-                <line x1="200" y1="0" x2="200" y2="180" />
-                <line x1="240" y1="0" x2="240" y2="180" />
-                <line x1="0" y1="30" x2="280" y2="30" />
-                <line x1="0" y1="60" x2="280" y2="60" />
-                <line x1="0" y1="90" x2="280" y2="90" />
-                <line x1="0" y1="120" x2="280" y2="120" />
-                <line x1="0" y1="150" x2="280" y2="150" />
-              </g>
-
-              {/* 1. River (Flood Source) */}
-              <path d="M 25 0 Q 15 90 25 180" className={`map-river ${riverClass}`} />
-              <text x="32" y="165" className="map-text label active">River (Flood Source)</text>
-
-              {/* 2. Perimeter Ditch (Pathway Activation) */}
-              <path d="M 22 70 L 100 70 L 100 135" className={`map-ditch ${ditchClass}`} />
-              <text x="35" y="65" className={`map-text ${phaseIdx >= 2 ? 'active' : ''}`}>Perimeter Ditch (Pathway Activation)</text>
-
-              {/* Yard Low Point (Water accumulation area) */}
-              <polygon points="90,75 130,75 130,135 90,135" className={`map-yard-flood ${yardClass}`} />
-              <text x="68" y="110" className={`map-text ${phaseIdx >= 2 ? 'active' : ''}`} style={{ fontSize: '6.5px' }}>Yard Low Point</text>
-
-              {/* 3. Factory Asset Outer */}
-              <rect x="150" y="30" width="115" height="120" rx="4" className={`map-asset ${assetClass}`} />
-              <text x="160" y="42" className="map-text label active">Factory Facility</text>
-
-              {/* Exposure at Risk: Electrical Substation */}
-              <rect x="160" y="50" width="30" height="25" rx="2" className={`map-asset ${assetClass}`} />
-              <text x="163" y="65" className="map-text" style={{ fontSize: '6px' }}>Substation</text>
-
-              {/* Exposure at Risk: Stock Area */}
-              <rect x="160" y="85" width="95" height="55" rx="2" className={`map-asset ${assetClass}`} />
-              <text x="165" y="98" className="map-text" style={{ fontSize: '7px' }}>Finished Stock Area</text>
-              <text x="165" y="108" className="map-text" style={{ fontSize: '6px', fill: 'var(--text-secondary)' }}>Exposure at Risk</text>
-
-              {/* Asset Impact Point: Loading Bay Threshold */}
-              <rect x="135" y="105" width="15" height="30" rx="1" className={`map-asset ${assetClass}`} />
-              <text x="138" y="100" className="map-text" style={{ fontSize: '5.5px' }}>Loading Bay</text>
-
-              {/* Mitigation Point: Defensive Barrier Line */}
-              <line x1="135" y1="105" x2="135" y2="135" className={`map-barrier ${barrierClass}`} />
-              <text x="82" y="152" className="map-text label">Barrier (Mitigation Point)</text>
-
-              {/* Node Marker 1: Upstream Sensor (Lead-Time Signal) */}
-              <circle
-                cx="21"
-                cy="35"
-                r="6"
-                className={`map-node ${selectedCard === 'river' ? 'selected' : ''} ${activeThreatNode === 'river' ? 'active-threat' : ''}`}
-                onClick={() => handleMarkerClick('river')}
-              />
-              <text x="32" y="32" className="map-text active">Upstream Sensor (Signal)</text>
-
-              {/* Node Marker 2: Rainfall Node (Hazard Driver) */}
-              <circle
-                cx="80"
-                cy="25"
-                r="6"
-                className={`map-node ${selectedCard === 'rainfall' ? 'selected' : ''}`}
-                onClick={() => handleMarkerClick('rainfall')}
-              />
-              <text x="90" y="22" className="map-text active">Rainfall Gauge (Driver)</text>
-
-              {/* Node Marker 3: Drainage Ditch Sensor */}
-              <circle
-                cx="100"
-                cy="90"
-                r="6"
-                className={`map-node ${selectedCard === 'drainage' ? 'selected' : ''} ${activeThreatNode === 'drainage' ? 'active-threat' : ''}`}
-                onClick={() => handleMarkerClick('drainage')}
-              />
-              <text x="108" y="88" className={`map-text ${phaseIdx >= 2 ? 'active' : ''}`}>Ditch Sensor</text>
-
-              {/* Node Marker 4: Loading Bay Threshold (Asset Impact Point) */}
-              <circle
-                cx="128"
-                cy="120"
-                r="6"
-                className={`map-node ${selectedCard === 'loadingBay' ? 'selected' : ''} ${activeThreatNode === 'loadingBay' ? (phase === 'ACTION' ? 'critical-threat' : 'active-threat') : ''}`}
-                onClick={() => handleMarkerClick('loadingBay')}
-              />
-              <text x="70" y="123" className={`map-text ${phaseIdx >= 3 ? 'active' : ''}`}>Loading Bay Ingress Sensor</text>
-            </svg>
-          </div>
+          <SiteContextMap
+            selectedId={selectedCard}
+            onMarkerClick={handleMarkerClick}
+            phase={phase}
+          />
         </div>
 
         {/* Right Pane: Clickable Driver Cards & Rationale Panels */}
