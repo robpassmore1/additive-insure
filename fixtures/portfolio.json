@@ -1,0 +1,68 @@
+{
+  "portfolio": [
+    {
+      "id": "fmcg-hero",
+      "name": "FMCG Bottling & Distribution Facility",
+      "sector": "FMCG",
+      "location": "East Midlands, UK",
+      "status": "live",
+      "statusLabel": "Hero scenario — fully built",
+      "propertySI": 50000000,
+      "biSI": 75000000,
+      "floodExcess": 4000000,
+      "actionAvailable": true,
+      "probableAvoidedRetainedLoss": 3000000,
+      "evidenceConfidence": "Probable avoided loss",
+      "hydrologicalCausality": "Probable",
+      "note": "Full simulated journey available. Primary demonstrator site."
+    },
+    {
+      "id": "logistics-contrast",
+      "name": "Ambient Logistics & Storage Hub",
+      "sector": "Logistics",
+      "location": "Thames Estuary, UK",
+      "status": "partial",
+      "statusLabel": "Contrast scenario — partial survey",
+      "propertySI": 28000000,
+      "biSI": 40000000,
+      "floodExcess": 2500000,
+      "actionAvailable": false,
+      "probableAvoidedRetainedLoss": null,
+      "evidenceConfidence": "Inconclusive — survey incomplete",
+      "hydrologicalCausality": "Uncertain",
+      "note": "Flood pathway survey in progress. Action logistics not yet confirmed. Simulated event not available."
+    },
+    {
+      "id": "water-utility",
+      "name": "Water Treatment Works",
+      "sector": "Utilities",
+      "location": "Yorkshire, UK",
+      "status": "stub",
+      "statusLabel": "Stub — scoping only",
+      "propertySI": 120000000,
+      "biSI": null,
+      "floodExcess": null,
+      "actionAvailable": false,
+      "probableAvoidedRetainedLoss": null,
+      "evidenceConfidence": null,
+      "hydrologicalCausality": null,
+      "note": "Scoping phase. No survey data, no simulated event. Indicative exposure only."
+    },
+    {
+      "id": "transport-hub",
+      "name": "Intermodal Transport Hub",
+      "sector": "Transport",
+      "location": "Humber, UK",
+      "status": "stub",
+      "statusLabel": "Stub — scoping only",
+      "propertySI": 85000000,
+      "biSI": null,
+      "floodExcess": null,
+      "actionAvailable": false,
+      "probableAvoidedRetainedLoss": null,
+      "evidenceConfidence": null,
+      "hydrologicalCausality": null,
+      "note": "Scoping phase. Coastal flood exposure under assessment. No simulated event."
+    }
+  ]
+}

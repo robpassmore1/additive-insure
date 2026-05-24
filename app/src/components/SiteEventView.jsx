@@ -3,111 +3,166 @@ import { useSimulation } from '../SimulationContext';
 import siteData from '../../../fixtures/site.json';
 import eventData from '../../../fixtures/event.json';
 
-const formatCurrency = (amount) => {
-  return new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP', maximumFractionDigits: 0 }).format(amount);
-};
+const fmt = (n) => new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP', maximumFractionDigits: 0 }).format(n);
 
 export default function SiteEventView() {
   const { phase, advancePhase, completeAction } = useSimulation();
-  
   const site = siteData.site;
   const policy = siteData.policy;
   const ev = eventData.event;
 
+  const phases = ['IDLE', 'RISING', 'ALERT', 'ACTION_TAKEN', 'RESOLVED'];
+  const phaseIdx = phases.indexOf(phase);
+
+  const badgeClass = {
+    IDLE: 'badge--idle', RISING: 'badge--rising',
+    ALERT: 'badge--alert', ACTION_TAKEN: 'badge--alert', RESOLVED: 'badge--resolved'
+  }[phase];
+
+  const phaseLabel = {
+    IDLE: 'Normal', RISING: 'Water Rising',
+    ALERT: 'Alert', ACTION_TAKEN: 'Action Taken', RESOLVED: 'Resolved'
+  }[phase];
+
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-        <h2 style={{ margin: 0 }}>Site Event View</h2>
-        <div className="simulation-controls" style={{ position: 'relative', right: 0, top: 0 }}>
-          <span className={`badge ${phase.toLowerCase()}`}>
-            Status: {phase.replace('_', ' ')}
+      {/* Page header with sim controls */}
+      <div className="sim-bar">
+        <div className="sim-bar__left">
+          <div className="page-title">Site Event View</div>
+          <div className="page-subtitle">{site.name} · Survey-informed risk profile · Simulated event</div>
+        </div>
+        <div className="sim-bar__right">
+          <span className={`badge ${badgeClass}`}>
+            {phaseLabel}
           </span>
-          {phase !== 'RESOLVED' && (
-            <button className="btn primary" onClick={advancePhase}>
+          {phase !== 'RESOLVED' && phase !== 'ACTION_TAKEN' && (
+            <button className="btn btn--primary btn--sm" onClick={advancePhase}>
               Simulate Time +
             </button>
           )}
         </div>
       </div>
 
+      {/* Policy Exposure */}
       <div className="card">
-        <div className="card-title">Site Overview</div>
-        <p style={{ marginTop: 0, color: 'var(--text-secondary)' }}>{site.name} • Survey-informed risk profile</p>
+        <div className="card-label">Policy Exposure</div>
         <div className="metric-grid">
           <div className="metric-box">
             <div className="metric-label">Property Sum Insured</div>
-            <div className="metric-value">{formatCurrency(policy.propertySumInsured)}</div>
+            <div className="metric-value">{fmt(policy.propertySumInsured)}</div>
           </div>
           <div className="metric-box">
             <div className="metric-label">BI Sum Insured</div>
-            <div className="metric-value">{formatCurrency(policy.businessInterruptionSumInsured)}</div>
+            <div className="metric-value">{fmt(policy.businessInterruptionSumInsured)}</div>
           </div>
           <div className="metric-box">
             <div className="metric-label">Flood Excess</div>
-            <div className="metric-value">{formatCurrency(policy.floodExcess)}</div>
+            <div className="metric-value metric-value--blue">{fmt(policy.floodExcess)}</div>
           </div>
           <div className="metric-box">
             <div className="metric-label">Daily Downtime Cost</div>
-            <div className="metric-value">{formatCurrency(ev.dailyDowntimeCost)}</div>
+            <div className="metric-value">{fmt(ev.dailyDowntimeCost)}</div>
           </div>
         </div>
       </div>
 
+      {/* Flood Pathway & Sensor Timeline */}
       <div className="card">
-        <div className="card-title">Flood Pathway & Sensor Simulation</div>
-        <p style={{ marginTop: 0, color: 'var(--text-secondary)' }}>
-          Hydrological pathway based on site survey. Simulated sensor node active.
+        <div className="card-label">Flood Pathway & Simulated Sensor Timeline</div>
+        <p className="card-body" style={{ marginTop: 0, marginBottom: '20px' }}>
+          Survey-informed hydrological pathway. Simulated sensor node active. Not operationally validated.
         </p>
-        
+
         <div className="timeline">
+          {/* T-360: always visible */}
           <div className="timeline-event">
-            <div className="timeline-time">T-Minus 360m</div>
-            <div className="timeline-content">Baseline normal. No water ingress detected.</div>
+            <div className={`timeline-dot ${phaseIdx >= 0 ? 'timeline-dot--resolved' : ''}`}></div>
+            <div className="timeline-time">T − 360 min</div>
+            <div className="timeline-content">
+              Baseline normal. No water ingress detected. Site operating within normal parameters.
+            </div>
           </div>
-          {(phase === 'RISING' || phase === 'ALERT' || phase === 'ACTION_TAKEN' || phase === 'RESOLVED') && (
+
+          {/* T-240: RISING+ */}
+          {phaseIdx >= 1 && (
             <div className="timeline-event">
-              <div className="timeline-time" style={{ color: 'var(--accent-blue)' }}>T-Minus 240m</div>
+              <div className="timeline-dot timeline-dot--active"></div>
+              <div className="timeline-time" style={{ color: 'var(--accent-blue-light)' }}>T − 240 min</div>
               <div className="timeline-content" style={{ borderColor: 'var(--accent-blue)' }}>
-                Water rising at property perimeter. Probability of ingress increasing.
+                <strong style={{ color: 'var(--accent-blue-light)' }}>Water rising at property perimeter.</strong>{' '}
+                Simulated sensor reading elevated. Probability of ingress increasing. Survey-informed threshold monitoring active.
               </div>
             </div>
           )}
-          {(phase === 'ALERT' || phase === 'ACTION_TAKEN' || phase === 'RESOLVED') && (
+
+          {/* T-150: ALERT+ */}
+          {phaseIdx >= 2 && (
             <div className="timeline-event">
-              <div className="timeline-time" style={{ color: 'var(--accent-amber)' }}>T-Minus 150m</div>
-              <div className="timeline-content" style={{ borderColor: 'var(--accent-amber)' }}>
-                Critical threshold breached. Projected loss without action: {formatCurrency(ev.predictedLossWithoutAction)}.
+              <div className="timeline-dot timeline-dot--alert"></div>
+              <div className="timeline-time" style={{ color: 'var(--color-warning-text)' }}>T − 150 min</div>
+              <div className="timeline-content" style={{ borderColor: 'var(--color-alert-border)' }}>
+                <strong style={{ color: 'var(--color-warning-text)' }}>Critical threshold breached.</strong>{' '}
+                Simulated ingress probability exceeds actionable level. Projected probable loss without action:{' '}
+                <strong>{fmt(ev.predictedLossWithoutAction)}</strong>.
+                Lead time window: p50 {ev.leadTimes.p50} min · minimum action time {ev.minimumActionTime} min.
+              </div>
+            </div>
+          )}
+
+          {/* T-0: RESOLVED */}
+          {phaseIdx >= 4 && (
+            <div className="timeline-event">
+              <div className="timeline-dot timeline-dot--resolved"></div>
+              <div className="timeline-time" style={{ color: '#34d399' }}>T − 0 min</div>
+              <div className="timeline-content" style={{ borderColor: 'var(--color-success-border)' }}>
+                <strong style={{ color: '#34d399' }}>Simulated flood peak passed.</strong>{' '}
+                Action recorded as complete prior to projected ingress. Event closed.
               </div>
             </div>
           )}
         </div>
       </div>
 
+      {/* Watch / Action Alert banner */}
       {(phase === 'ALERT' || phase === 'ACTION_TAKEN') && (
         <div className="action-banner">
-          <div>
-            <h3>Watch / Action Alert</h3>
-            <p><strong>Action required:</strong> {ev.action}</p>
-            <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '5px' }}>
-              Minimum action time: {ev.minimumActionTime}m
-            </p>
+          <div style={{ flex: 1 }}>
+            <div className="action-banner__title">⚡ Watch / Action Alert</div>
+            <div className="action-banner__body">
+              <strong>Action required:</strong> {ev.action}
+            </div>
+            <div className="action-banner__sub">
+              Action cost: {fmt(ev.actionCost)} · Minimum execution time: {ev.minimumActionTime} min ·
+              Available window (p50): {ev.leadTimes.p50} min
+            </div>
           </div>
-          {phase === 'ALERT' && (
-            <button className="btn primary" onClick={completeAction}>
-              Mark Action Complete
-            </button>
-          )}
-          {phase === 'ACTION_TAKEN' && (
-            <span className="badge resolved" style={{ fontSize: '1rem', padding: '8px 16px' }}>Action Completed</span>
-          )}
+          <div style={{ flexShrink: 0 }}>
+            {phase === 'ALERT' ? (
+              <button className="btn btn--primary" onClick={completeAction}>
+                Mark Action Complete
+              </button>
+            ) : (
+              <span className="badge badge--resolved" style={{ fontSize: '12px', padding: '6px 14px' }}>
+                ✓ Action Completed
+              </span>
+            )}
+          </div>
         </div>
       )}
 
+      {/* Resolved banner */}
       {phase === 'RESOLVED' && (
-        <div className="action-banner" style={{ backgroundColor: 'rgba(35, 134, 54, 0.1)', borderColor: 'var(--accent-green)' }}>
-          <div>
-            <h3 style={{ color: 'var(--accent-green)' }}>Event Resolved</h3>
-            <p>Simulated flood peak passed. Action confirmed complete prior to ingress.</p>
+        <div className="card card--success">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <span style={{ fontSize: '20px' }}>✓</span>
+            <div>
+              <div style={{ fontWeight: 700, color: '#34d399', marginBottom: '2px' }}>Event Resolved</div>
+              <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
+                Simulated flood peak passed. Action confirmed complete prior to projected ingress.
+                Navigate to <strong>Evidence / Impact Ledger</strong> to review the probable avoided loss.
+              </div>
+            </div>
           </div>
         </div>
       )}

@@ -3,179 +3,191 @@ import { useSimulation } from '../SimulationContext';
 import siteData from '../../../fixtures/site.json';
 import eventData from '../../../fixtures/event.json';
 
-const formatCurrency = (amount) => {
-  return new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP', maximumFractionDigits: 0 }).format(amount);
-};
+const fmt = (n) => new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP', maximumFractionDigits: 0 }).format(n);
 
 export default function UnderwriterView() {
   const { phase } = useSimulation();
   const policy = siteData.policy;
-  const ev = eventData.event;
   const site = siteData.site;
+  const ev = eventData.event;
+  const resolved = phase === 'RESOLVED';
 
   return (
     <div>
-      <h2 style={{ marginBottom: '4px' }}>Underwriter / Broker View</h2>
-      <p style={{ margin: '0 0 24px 0', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-        {site.name} — Commercial resilience summary
-      </p>
-
-      {/* Policy Exposure */}
-      <div className="card">
-        <div className="card-title">Policy Exposure</div>
-        <div className="metric-grid">
-          <div className="metric-box">
-            <div className="metric-label">Property Sum Insured</div>
-            <div className="metric-value">{formatCurrency(policy.propertySumInsured)}</div>
-          </div>
-          <div className="metric-box">
-            <div className="metric-label">BI Sum Insured</div>
-            <div className="metric-value">{formatCurrency(policy.businessInterruptionSumInsured)}</div>
-          </div>
-          <div className="metric-box">
-            <div className="metric-label">Flood Excess</div>
-            <div className="metric-value">{formatCurrency(policy.floodExcess)}</div>
-          </div>
-          <div className="metric-box">
-            <div className="metric-label">Coverage Position</div>
-            <div className="metric-value info">{ev.coveragePosition}</div>
-          </div>
+      <div className="page-header">
+        <div className="page-title">Underwriter / Broker View</div>
+        <div className="page-subtitle">
+          {site.name} · Commercial resilience summary · Survey-informed · Subject to validation
         </div>
       </div>
 
-      {/* Resilience Action Summary */}
-      {phase === 'RESOLVED' ? (
+      {/* ─── RESOLVED: full meeting moment ─── */}
+      {resolved ? (
         <>
-          <div className="card">
-            <div className="card-title">Resilience Action — Simulated Outcome</div>
-            <p style={{ color: 'var(--text-secondary)', marginTop: 0, marginBottom: '20px', fontSize: '0.85rem' }}>
-              Based on survey-informed site data. Subject to validation. Hydrological uncertainty applies.
-            </p>
+          {/* Hero card — Probable Avoided Retained Loss */}
+          <div className="card card--hero" style={{ marginBottom: '16px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '24px' }}>
+              <div className="card-label" style={{ color: 'var(--accent-blue-light)' }}>
+                Probable Avoided Retained Loss — Simulated · Subject to Validation
+              </div>
+              <div className="metric-value metric-value--hero" style={{ color: 'var(--text-primary)' }}>
+                {fmt(ev.retainedLossAvoided)}
+              </div>
+              <div style={{ fontSize: '13px', color: 'var(--text-secondary)', maxWidth: '560px', lineHeight: '1.6' }}>
+                Simulated probable avoided loss within the insured's retained deductible layer.
+                Not operationally validated. Hydrological uncertainty applies.
+                This is not a guaranteed outcome or a claims avoidance figure.
+              </div>
+            </div>
+
+            {/* Supporting commercial metrics */}
             <div className="metric-grid">
               <div className="metric-box">
-                <div className="metric-label">Action</div>
-                <div style={{ fontSize: '0.95rem', fontWeight: 500, color: 'var(--text-primary)', paddingTop: '4px' }}>
-                  {ev.action}
-                </div>
+                <div className="metric-label">Flood Excess (Retained)</div>
+                <div className="metric-value">{fmt(policy.floodExcess)}</div>
+              </div>
+              <div className="metric-box">
+                <div className="metric-label">Coverage Position</div>
+                <div className="metric-value metric-value--blue metric-value--sm">{ev.coveragePosition}</div>
               </div>
               <div className="metric-box">
                 <div className="metric-label">Action Cost</div>
-                <div className="metric-value">{formatCurrency(ev.actionCost)}</div>
+                <div className="metric-value">{fmt(ev.actionCost)}</div>
               </div>
               <div className="metric-box">
-                <div className="metric-label">Predicted Loss (No Action)</div>
-                <div className="metric-value warning">{formatCurrency(ev.predictedLossWithoutAction)}</div>
+                <div className="metric-label">Probable Loss — No Action</div>
+                <div className="metric-value metric-value--amber">{fmt(ev.predictedLossWithoutAction)}</div>
               </div>
-              <div className="metric-box">
-                <div className="metric-label">Predicted Loss (With Action)</div>
-                <div className="metric-value">{formatCurrency(ev.predictedLossWithAction)}</div>
+            </div>
+
+            {/* Evidence quality strip */}
+            <div className="evidence-row">
+              <div className="evidence-item">
+                <div className="evidence-item__label">Hydrological Causality</div>
+                <div className="evidence-item__value evidence-item__value--blue">{ev.hydrologicalCausality}</div>
+              </div>
+              <div className="evidence-item">
+                <div className="evidence-item__label">Evidence Confidence</div>
+                <div className="evidence-item__value evidence-item__value--green">{ev.evidenceConfidence}</div>
+              </div>
+              <div className="evidence-item">
+                <div className="evidence-item__label">Validation Status</div>
+                <div className="evidence-item__value evidence-item__value--amber">Not operationally validated</div>
+              </div>
+              <div className="evidence-item">
+                <div className="evidence-item__label">Hydrological Uncertainty</div>
+                <div className="evidence-item__value" style={{ color: 'var(--text-muted)' }}>Applies</div>
               </div>
             </div>
           </div>
 
-          {/* Meeting Moment: Probable Avoided Retained Loss */}
-          <div className="card" style={{
-            border: '1px solid var(--accent-blue)',
-            background: 'linear-gradient(135deg, rgba(31, 111, 235, 0.08) 0%, rgba(31, 111, 235, 0.03) 100%)'
-          }}>
-            <div className="card-title" style={{ color: 'var(--accent-blue)' }}>
-              Probable Avoided Retained Loss
-            </div>
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '30px', flexWrap: 'wrap', marginBottom: '24px' }}>
-              <div>
-                <div style={{ fontSize: '3rem', fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1 }}>
-                  {formatCurrency(ev.retainedLossAvoided)}
-                </div>
-                <div style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginTop: '8px', maxWidth: '360px' }}>
-                  Simulated probable avoided retained loss within the insured's deductible layer. Not operationally validated. Subject to validation.
-                </div>
+          {/* Policy exposure summary */}
+          <div className="card">
+            <div className="card-label">Full Policy Exposure</div>
+            <div className="metric-grid">
+              <div className="metric-box">
+                <div className="metric-label">Property Sum Insured</div>
+                <div className="metric-value">{fmt(policy.propertySumInsured)}</div>
               </div>
-            </div>
-
-            {/* Evidence Quality Row */}
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-              gap: '12px',
-              paddingTop: '16px',
-              borderTop: '1px solid var(--border-color)'
-            }}>
-              <div>
-                <div className="metric-label">Hydrological Causality</div>
-                <div style={{ color: 'var(--accent-blue)', fontWeight: 600, marginTop: '4px' }}>
-                  {ev.hydrologicalCausality}
-                </div>
+              <div className="metric-box">
+                <div className="metric-label">BI Sum Insured</div>
+                <div className="metric-value">{fmt(policy.businessInterruptionSumInsured)}</div>
               </div>
-              <div>
-                <div className="metric-label">Evidence Confidence</div>
-                <div style={{ color: 'var(--accent-green)', fontWeight: 600, marginTop: '4px' }}>
-                  {ev.evidenceConfidence}
-                </div>
+              <div className="metric-box">
+                <div className="metric-label">Gross Avoided Loss</div>
+                <div className="metric-value metric-value--green">{fmt(ev.grossAvoidedLoss)}</div>
               </div>
-              <div>
-                <div className="metric-label">Validation Status</div>
-                <div style={{ color: 'var(--accent-amber)', fontWeight: 600, marginTop: '4px' }}>
-                  Not operationally validated
-                </div>
-              </div>
-              <div>
-                <div className="metric-label">Hydrological Uncertainty</div>
-                <div style={{ color: 'var(--text-secondary)', fontWeight: 600, marginTop: '4px' }}>
-                  Applies
-                </div>
+              <div className="metric-box">
+                <div className="metric-label">Predicted Loss — With Action</div>
+                <div className="metric-value">{fmt(ev.predictedLossWithAction)}</div>
               </div>
             </div>
           </div>
 
-          {/* Evidence Gaps */}
-          <div className="card" style={{ borderColor: 'var(--border-color)' }}>
-            <div className="card-title" style={{ color: 'var(--text-secondary)', fontSize: '0.95rem' }}>
-              Evidence Gaps — Sprint 001
-            </div>
-            <ul style={{ margin: 0, paddingLeft: '20px', color: 'var(--text-secondary)', fontSize: '0.85rem', lineHeight: '1.9' }}>
-              <li>Simulated event only — no live sensor data</li>
-              <li>Survey-informed pathway — not field-validated sensor placement</li>
-              <li>No live flood model or NWP forecast integration</li>
-              <li>Lead time distributions illustrative — not calibrated</li>
-              <li>No claims workflow or premium/pricing engine connected</li>
+          {/* Evidence gaps */}
+          <div className="card">
+            <div className="card-label">Evidence Gaps — Sprint 001 / Version 1.1</div>
+            <ul style={{ margin: 0, paddingLeft: '18px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              {[
+                'Simulated event only — no live sensor data',
+                'Survey-informed flood pathway — not field-validated sensor placement',
+                'No live flood model or NWP forecast integration',
+                'Lead time distributions illustrative — not calibrated to historical data',
+                'No claims workflow or premium/pricing engine connected',
+              ].map((gap, i) => (
+                <li key={i} style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>{gap}</li>
+              ))}
             </ul>
           </div>
         </>
       ) : (
-        /* Contrast scenario: no event resolved yet */
+        /* ─── CONTRAST: no-action / pre-event state ─── */
         <>
-          <div className="card" style={{
-            border: '1px dashed var(--border-color)',
-            background: 'rgba(0,0,0,0.1)'
-          }}>
-            <div className="card-title" style={{ color: 'var(--text-secondary)' }}>
-              No Resilience Action on Record
+          {/* No-action exposure card */}
+          <div className="card card--alert" style={{ marginBottom: '16px' }}>
+            <div style={{ marginBottom: '20px' }}>
+              <div className="card-label" style={{ color: 'var(--color-warning-text)' }}>
+                No Resilience Action on Record — Unmitigated Retained Exposure
+              </div>
+              <div className="metric-value metric-value--hero metric-value--amber">
+                {fmt(ev.predictedLossWithoutAction)}
+              </div>
+              <div style={{ fontSize: '13px', color: 'var(--text-secondary)', maxWidth: '560px', lineHeight: '1.6', marginTop: '6px' }}>
+                Probable retained loss if no action is deployed. Estimated from survey-informed flood pathway.
+                Without a recorded and evidenced action, this exposure sits within the deductible layer with no evidence of mitigation.
+              </div>
             </div>
-            <p style={{ color: 'var(--text-secondary)', margin: '0 0 16px 0', fontSize: '0.9rem' }}>
-              Without a recorded and validated resilience action, the probable retained loss exposure remains within the deductible.
-            </p>
+
             <div className="metric-grid">
               <div className="metric-box">
-                <div className="metric-label">Probable Retained Loss</div>
-                <div className="metric-value warning">{formatCurrency(ev.predictedLossWithoutAction)}</div>
+                <div className="metric-label">Flood Excess (Retained)</div>
+                <div className="metric-value">{fmt(policy.floodExcess)}</div>
               </div>
               <div className="metric-box">
-                <div className="metric-label">Flood Excess</div>
-                <div className="metric-value">{formatCurrency(policy.floodExcess)}</div>
-              </div>
-              <div className="metric-box">
-                <div className="metric-label">Evidence Confidence</div>
-                <div style={{ color: 'var(--text-secondary)', fontWeight: 600, marginTop: '4px', paddingTop: '4px' }}>
-                  No action recorded
-                </div>
+                <div className="metric-label">Coverage Position</div>
+                <div className="metric-value metric-value--blue metric-value--sm">{ev.coveragePosition}</div>
               </div>
               <div className="metric-box">
                 <div className="metric-label">Probable Avoided Retained Loss</div>
-                <div style={{ color: 'var(--text-secondary)', fontWeight: 600, marginTop: '4px', paddingTop: '4px' }}>
-                  Awaiting event outcome
+                <div className="metric-value metric-value--muted metric-value--sm">Awaiting event outcome</div>
+              </div>
+              <div className="metric-box">
+                <div className="metric-label">Action Available</div>
+                <div className="metric-value metric-value--sm" style={{ color: 'var(--color-warning-text)' }}>
+                  Not yet recorded
                 </div>
               </div>
             </div>
+
+            {/* Evidence quality — inconclusive */}
+            <div className="evidence-row">
+              <div className="evidence-item">
+                <div className="evidence-item__label">Hydrological Causality</div>
+                <div className="evidence-item__value" style={{ color: 'var(--text-muted)' }}>No event recorded</div>
+              </div>
+              <div className="evidence-item">
+                <div className="evidence-item__label">Evidence Confidence</div>
+                <div className="evidence-item__value evidence-item__value--amber">No action recorded</div>
+              </div>
+              <div className="evidence-item">
+                <div className="evidence-item__label">Validation Status</div>
+                <div className="evidence-item__value" style={{ color: 'var(--text-muted)' }}>Not applicable</div>
+              </div>
+              <div className="evidence-item">
+                <div className="evidence-item__label">Probable Retained Exposure</div>
+                <div className="evidence-item__value evidence-item__value--amber">{fmt(ev.predictedLossWithoutAction)}</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Context card */}
+          <div className="card card--muted">
+            <div className="card-label">What this view shows without an action</div>
+            <p className="card-body" style={{ margin: 0, lineHeight: '1.7' }}>
+              When no resilience action is recorded and evidenced, the Underwriter / Broker View shows only the unmitigated probable retained exposure.
+              The probable avoided retained loss of <strong style={{ color: 'var(--text-primary)' }}>{fmt(ev.retainedLossAvoided)}</strong> is not available until an action is completed.
+              Run the simulation on <strong style={{ color: 'var(--text-primary)' }}>Site Event View</strong> to see the full meeting moment.
+            </p>
           </div>
         </>
       )}
