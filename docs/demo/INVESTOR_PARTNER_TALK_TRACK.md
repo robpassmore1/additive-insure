@@ -54,7 +54,7 @@ Investors and strategic partners care about **business model viability, scalabil
 Conclude the investor presentation by highlighting our disciplined product development process:
 * **Version 1.1 (Today):** A fully realized, meeting-ready demonstrator used to secure broker partnerships and pilot commitments.
 * **Version 1.2 (Next):** Incorporating feedback from these pilot partners to harden the narrative and finalize the telemetry integration design.
-* **Long-term Vision:** Unlocking parametric and hybrid insurance structures. By having verified physical proof of mitigation, we can underwrite policies that pay out faster and cost less.
+* **Long-term Vision (Future Roadmap Optionality Only):** Unlocking parametric and hybrid insurance structures. Frame this strictly as future roadmap optionality—Version 1.1 does not support parametric pricing, automatic triggers, or automated payouts.
 
 ---
 
@@ -62,6 +62,7 @@ Conclude the investor presentation by highlighting our disciplined product devel
 
 To maintain professional credibility, explicitly note the following:
 * **No Live Forecasting Yet:** Telemetry is fully simulated in this version to show the workflow.
+* **Not a Parametric Product:** Clarify that Version 1.1 is a demonstrator of human-in-the-loop physical mitigation verification. It does not possess parametric triggers or automated payout mechanisms.
 * **Regulatory Compliance:** Underwriting and premium calculation are conceptual; full compliance and actuarial validation are scheduled for future development phases.
 
 ---
