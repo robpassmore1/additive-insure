@@ -104,9 +104,8 @@ export default function UnderwriterView() {
             </div>
           </div>
 
-          {/* Evidence gaps */}
           <div className="card">
-            <div className="card-label">Evidence Gaps — Sprint 001 / Version 1.1</div>
+            <div className="card-label">Evidence Gaps — Version 1.2</div>
             <ul style={{ margin: 0, paddingLeft: '18px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
               {[
                 'Simulated event only — no live sensor data',

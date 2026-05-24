@@ -6,65 +6,73 @@ const STEPS = [
     id: 'site',
     screen: 'SITE_EVENT',
     heading: 'Open the site',
-    body: 'Navigate to Site Event View. Draw attention to the FMCG hero site, its policy exposure — £50m property, £75m BI, £4m flood excess — and the daily downtime cost of £350k.',
+    body: 'Navigate to Site Event View. Draw attention to the map-centered dashboard representing the place, pathway, assets at risk, and active drivers.',
     action: '→ Click "Site Event View" in the sidebar',
-    note: 'This is the baseline. Nothing has happened yet. The policy is exposed to flood risk.'
+    note: 'This is the baseline (Normal/IDLE state). The river flow is normal, and all sensor readings are dry/normal.'
   },
   {
     id: 'rising',
     screen: 'SITE_EVENT',
     heading: 'Advance to water rising',
-    body: 'Click "Simulate Time +" once. The status badge changes to RISING. A second timeline entry appears: water rising at the property perimeter, probability of ingress increasing.',
+    body: 'Click "Simulate Time +" once. The state moves to RISING. The river level swells, and the Upstream Sensor (lead-time signal) is highlighted on the map.',
     action: '→ Click "Simulate Time +"',
-    note: 'The simulated event is survey-informed. This is not live sensor data.'
+    note: 'River Level is the active threat driver. The timeline updates to T-240 min.'
   },
   {
-    id: 'alert',
+    id: 'watch',
     screen: 'SITE_EVENT',
-    heading: 'Trigger the Watch / Action Alert',
-    body: 'Click "Simulate Time +" again. Status moves to ALERT. The critical threshold entry appears on the timeline, showing a projected loss without action of £3.5m. The amber action banner surfaces.',
-    action: '→ Click "Simulate Time +" again',
-    note: 'This is the decision window. The action logistics support execution within minimum time.'
+    heading: 'Advance to Watch alert',
+    body: 'Click "Simulate Time +" again. The state moves to WATCH. The perimeter drainage ditch fills with water, and the Drainage / Yard Low Point driver card activates.',
+    action: '→ Click "Simulate Time +"',
+    note: 'This represents pathway activation. Model Card triggers automatically showing active validation basis.'
   },
   {
     id: 'action',
     screen: 'SITE_EVENT',
+    heading: 'Trigger the Action alert',
+    body: 'Click "Simulate Time +" once more. The state moves to ACTION. Ingress reaches the loading bay asset impact point. Flashing warnings alert the site manager to deploy barriers.',
+    action: '→ Click "Simulate Time +"',
+    note: 'The Action/Runbook Card details the exact deployment parameters and timeline feasibility.'
+  },
+  {
+    id: 'action_taken',
+    screen: 'SITE_EVENT',
     heading: 'Mark the action complete',
-    body: 'The action required is: deploy temporary flood barriers at the loading bay. This costs £25k and requires 120 minutes minimum. Click "Mark Action Complete" to record it.',
+    body: 'Click "Mark Action Complete" in the alert banner. The barrier location closes, blocking the pathway to the finished stock area and electrical substation.',
     action: '→ Click "Mark Action Complete"',
-    note: 'The event auto-resolves after 2 seconds. The green Event Resolved banner confirms closure.'
+    note: 'The event automatically transitions to RESOLVED after 2 seconds.'
   },
   {
     id: 'ledger',
     screen: 'EVIDENCE',
     heading: 'Review the Evidence / Impact Ledger',
-    body: 'Navigate to Evidence / Impact Ledger. The impact ledger is now populated: predicted loss without action £3.5m, with action £500k, gross avoided loss £3m. Hydrological causality is probable. Evidence confidence is probable avoided loss.',
+    body: 'Navigate to Evidence / Impact Ledger. Verify the complete chronological audit trail and the gross avoided loss calculation of £3,000,000.',
     action: '→ Click "Evidence / Impact Ledger" in sidebar',
-    note: 'This is the evidence layer. Draw attention to the lead time model: p50 is 240 minutes — the action was feasible within the window.'
+    note: 'The verified action successfully protected the asset exposure from the simulated flood.'
   },
   {
     id: 'underwriter',
     screen: 'UNDERWRITER',
     heading: 'Present the Underwriter / Broker View',
-    body: 'Navigate to Underwriter / Broker View. This is the meeting moment. Lead with the £3m probable avoided retained loss. Flood excess is £4m — the entire retained loss sits inside the excess. Action cost is £25k.',
+    body: 'Navigate to Underwriter / Broker View. Present the £3m probable avoided retained loss. Discuss the 8 commercial metrics, causality status, and evidence gaps.',
     action: '→ Click "Underwriter / Broker View" in sidebar',
-    note: 'Emphasise the evidence quality row: causality probable, confidence probable avoided loss, status not operationally validated. These are explicit qualifiers, not overclaims.'
+    note: 'This is the "meeting moment". All calculations are backed by the verified evidence pack.'
   },
   {
     id: 'contrast',
     screen: 'UNDERWRITER',
     heading: 'Show the contrast scenario',
-    body: 'Click "Reset Simulation" at the bottom of the sidebar. The Underwriter / Broker View now shows the no-action state: £3.5m probable retained exposure in amber, evidence confidence "No action recorded", and "Awaiting event outcome".',
+    body: 'Click "Reset Simulation" at the bottom of the sidebar. The Underwriter / Broker View shifts to show the £3.5m unmitigated exposure state if no action had been recorded.',
     action: '→ Click "Reset Simulation" in sidebar',
-    note: 'This contrast is the product argument: without a recorded and evidenced action, the retained exposure stands. The £3m gap is the demonstrable value of the action.'
+    note: 'The £3m gap between the mitigated and unmitigated state demonstrates the value of the place-based mitigation system.'
   },
   {
     id: 'portfolio',
     screen: 'PORTFOLIO',
     heading: 'Teaser: the portfolio view',
-    body: 'Navigate to Portfolio Teaser. Show the four-row portfolio: the FMCG hero site (live), the logistics contrast site (partial survey, inconclusive), and two stub rows — water utility and transport hub.',
+    body: 'Navigate to Portfolio Teaser to show how risk mitigation visibility aggregates across a multi-site property portfolio.',
     action: '→ Click "Portfolio Teaser" in sidebar',
-    note: 'This is a teaser only. The partial and stub rows are scoping-phase indicators, not live scenarios.'
+    note: 'Different sites exhibit varying survey completeness and confidence scores (Live, Partial, Stub).'
   }
 ];
 
@@ -75,8 +83,9 @@ export default function DemoGuide({ isOpen, onClose, onNavigate }) {
   const getActiveStep = () => {
     if (phase === 'IDLE') return 'site';
     if (phase === 'RISING') return 'rising';
-    if (phase === 'ALERT') return 'alert';
-    if (phase === 'ACTION_TAKEN') return 'action';
+    if (phase === 'WATCH') return 'watch';
+    if (phase === 'ACTION') return 'action';
+    if (phase === 'ACTION_TAKEN') return 'action_taken';
     if (phase === 'RESOLVED') return 'ledger';
     return 'site';
   };
@@ -91,7 +100,7 @@ export default function DemoGuide({ isOpen, onClose, onNavigate }) {
           <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>Presenter mode — not for screen share</div>
         </div>
         <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-          <span className="demo-guide__badge">v1.1</span>
+          <span className="demo-guide__badge">v1.2</span>
           <button className="btn btn--ghost btn--sm" onClick={onClose} style={{ padding: '4px 8px' }}>✕</button>
         </div>
       </div>

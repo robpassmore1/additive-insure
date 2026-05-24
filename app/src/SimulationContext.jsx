@@ -3,15 +3,16 @@ import React, { createContext, useState, useContext } from 'react';
 const SimulationContext = createContext();
 
 export const SimulationProvider = ({ children }) => {
-  // Phases: IDLE -> RISING -> ALERT -> ACTION_TAKEN -> RESOLVED
+  // Phases: IDLE -> RISING -> WATCH -> ACTION -> ACTION_TAKEN -> RESOLVED
   const [phase, setPhase] = useState('IDLE');
   
   const advancePhase = () => {
     setPhase(prev => {
       switch(prev) {
         case 'IDLE': return 'RISING';
-        case 'RISING': return 'ALERT';
-        case 'ALERT': return 'ACTION_TAKEN';
+        case 'RISING': return 'WATCH';
+        case 'WATCH': return 'ACTION';
+        case 'ACTION': return 'ACTION_TAKEN';
         case 'ACTION_TAKEN': return 'RESOLVED';
         default: return prev;
       }
@@ -19,7 +20,7 @@ export const SimulationProvider = ({ children }) => {
   };
 
   const completeAction = () => {
-    if (phase === 'ALERT') {
+    if (phase === 'ACTION') {
       setPhase('ACTION_TAKEN');
       setTimeout(() => {
         setPhase('RESOLVED');

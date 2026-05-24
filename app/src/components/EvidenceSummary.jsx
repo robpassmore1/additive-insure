@@ -43,7 +43,7 @@ export default function EvidenceSummary() {
                 Additive Insure — Resilience Action Record
               </div>
               <div style={{ fontSize: '13px', color: 'var(--text-muted)', marginTop: '4px' }}>
-                Sprint 001 / Version 1.1 · Simulated demonstrator · {now()}
+                Version 1.2 · Place-Based ALT Demonstrator · {now()}
               </div>
             </div>
             <div>
@@ -179,7 +179,7 @@ export default function EvidenceSummary() {
 
         {/* Disclaimer */}
         <div className="disclaimer-box">
-          <strong>Important notice.</strong> This evidence summary is generated from a controlled demonstrator using simulated data and survey-informed assumptions. It does not constitute an operationally validated loss assessment, a claims record, a policy endorsement, or a pricing recommendation. All values are subject to validation. Hydrological uncertainty applies throughout. This document is for internal review and demonstrator purposes only. Version: Additive Insure 1.1 · Sprint 002.
+          <strong>Important notice.</strong> This evidence summary is generated from a controlled demonstrator using simulated data and survey-informed assumptions. It does not constitute an operationally validated loss assessment, a claims record, a policy endorsement, or a pricing recommendation. All values are subject to validation. Hydrological uncertainty applies throughout. This document is for internal review and demonstrator purposes only. Version: Additive Insure 1.2 · Sprint 003.
         </div>
       </div>
     </div>
