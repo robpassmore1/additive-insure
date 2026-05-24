@@ -1,10 +1,16 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useMap } from './MapProvider';
 import mapLayers from '../../../fixtures/map_layers.json';
-import spatialObjects from '../../../fixtures/spatial_objects.json';
 
-export default function LocalFallbackMapProvider({ selectedId, onMarkerClick, phase }) {
-  const { map, siteBoundary, riverLine, floodPathway, mockRoads } = mapLayers;
-  const { objects } = spatialObjects;
+export default function LocalFallbackMapProvider() {
+  const { setMapInstance, setProviderType, overlays, selectedId, onMarkerClick, phase } = useMap();
+  const { map, mockRoads } = mapLayers;
+  const { siteBoundary, riverLine, floodPathway, objects } = overlays;
+
+  useEffect(() => {
+    setProviderType('fallback');
+    setMapInstance('fallback-canvas');
+  }, [setProviderType, setMapInstance]);
 
   // Simple Mercator-like linear projection for a micro-region
   const project = (coord) => {
@@ -21,6 +27,7 @@ export default function LocalFallbackMapProvider({ selectedId, onMarkerClick, ph
   };
 
   const getPointsStr = (coords) => {
+    if (!coords || coords.length === 0) return '';
     return coords.map(c => {
       const { x, y } = project(c);
       return `${x},${y}`;
@@ -28,6 +35,7 @@ export default function LocalFallbackMapProvider({ selectedId, onMarkerClick, ph
   };
 
   const getPathD = (coords) => {
+    if (!coords || coords.length === 0) return '';
     return coords.reduce((acc, c, idx) => {
       const { x, y } = project(c);
       return acc + (idx === 0 ? `M ${x} ${y}` : ` L ${x} ${y}`);
@@ -76,29 +84,41 @@ export default function LocalFallbackMapProvider({ selectedId, onMarkerClick, ph
         ))}
 
         {/* 1. River (Flood Source) */}
-        <path d={getPathD(riverLine)} className={`map-river ${riverClass}`} />
-        <text x="32" y="165" className="map-text label active">River (Flood Source)</text>
+        {riverLine && riverLine.length > 0 && (
+          <>
+            <path d={getPathD(riverLine)} className={`map-river ${riverClass}`} />
+            <text x="32" y="165" className="map-text label active">River (Flood Source)</text>
+          </>
+        )}
 
         {/* 2. Perimeter Ditch (Pathway Activation) & Yard Low Point */}
-        <path d={getPathD(floodPathway.slice(0, 3))} className={`map-ditch ${ditchClass}`} />
-        <text x="35" y="65" className={`map-text ${phaseIdx >= 2 ? 'active' : ''}`}>Perimeter Ditch (Pathway Activation)</text>
+        {floodPathway && floodPathway.length > 0 && (
+          <>
+            <path d={getPathD(floodPathway.slice(0, 3))} className={`map-ditch ${ditchClass}`} />
+            <text x="35" y="65" className={`map-text ${phaseIdx >= 2 ? 'active' : ''}`}>Perimeter Ditch (Pathway Activation)</text>
 
-        {/* Yard Low Point flood overlay polygon (uses the pathway nodes boundary) */}
-        {(() => {
-          const p1 = project(floodPathway[1]);
-          const p2 = project(floodPathway[2]);
-          return (
-            <polygon
-              points={`${p1.x - 15},${p1.y} ${p1.x + 20},${p1.y} ${p2.x + 10},${p2.y} ${p2.x - 20},${p2.y}`}
-              className={`map-yard-flood ${yardClass}`}
-            />
-          );
-        })()}
-        <text x="68" y="110" className={`map-text ${phaseIdx >= 2 ? 'active' : ''}`} style={{ fontSize: '6.5px' }}>Yard Low Point</text>
+            {/* Yard Low Point flood overlay polygon (uses the pathway nodes boundary) */}
+            {(() => {
+              const p1 = project(floodPathway[1]);
+              const p2 = project(floodPathway[2]);
+              return (
+                <polygon
+                  points={`${p1.x - 15},${p1.y} ${p1.x + 20},${p1.y} ${p2.x + 10},${p2.y} ${p2.x - 20},${p2.y}`}
+                  className={`map-yard-flood ${yardClass}`}
+                />
+              );
+            })()}
+            <text x="68" y="110" className={`map-text ${phaseIdx >= 2 ? 'active' : ''}`} style={{ fontSize: '6.5px' }}>Yard Low Point</text>
+          </>
+        )}
 
         {/* 3. Site/Factory Boundary Polygon */}
-        <polygon points={getPointsStr(siteBoundary)} className={`map-asset ${assetClass}`} style={{ strokeWidth: '1px', fillOpacity: 0.02 }} />
-        <text x="160" y="42" className="map-text label active">Factory Site Boundary</text>
+        {siteBoundary && siteBoundary.length > 0 && (
+          <>
+            <polygon points={getPointsStr(siteBoundary)} className={`map-asset ${assetClass}`} style={{ strokeWidth: '1px', fillOpacity: 0.02 }} />
+            <text x="160" y="42" className="map-text label active">Factory Site Boundary</text>
+          </>
+        )}
 
         {/* 4. Substation (Exposure) */}
         {(() => {

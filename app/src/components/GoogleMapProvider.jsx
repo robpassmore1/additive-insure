@@ -1,13 +1,15 @@
 import React, { useEffect, useRef } from 'react';
+import { useMap } from './MapProvider';
 import mapLayers from '../../../fixtures/map_layers.json';
-import spatialObjects from '../../../fixtures/spatial_objects.json';
 
-export default function GoogleMapProvider({ selectedId, onMarkerClick, phase }) {
+export default function GoogleMapProvider() {
   const mapRef = useRef(null);
-  const { map: mapConfig, siteBoundary, riverLine, floodPathway } = mapLayers;
-  const { objects } = spatialObjects;
+  const { setMapInstance, setProviderType, overlays, selectedId, onMarkerClick, phase } = useMap();
+  const { map: mapConfig } = mapLayers;
+  const { siteBoundary, riverLine, floodPathway, objects } = overlays;
 
   useEffect(() => {
+    setProviderType('google');
     const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
     if (!apiKey) return;
 
@@ -22,7 +24,7 @@ export default function GoogleMapProvider({ selectedId, onMarkerClick, phase }) 
       script.defer = true;
       document.head.appendChild(script);
     } else {
-      // Script already loaded, trigger initGoogleMap if maps sdk loaded
+      // Script already loaded, trigger initMap directly if SDK loaded
       if (window.google && window.google.maps) {
         setTimeout(() => {
           if (window.initGoogleMap) window.initGoogleMap();
@@ -52,103 +54,113 @@ export default function GoogleMapProvider({ selectedId, onMarkerClick, phase }) 
       };
 
       const map = new window.google.maps.Map(mapRef.current, mapOptions);
+      setMapInstance(map);
 
-      // 1. Site Boundary Polygon (insured location)
-      new window.google.maps.Polygon({
-        paths: siteBoundary,
-        strokeColor: '#3d4f66',
-        strokeOpacity: 0.8,
-        strokeWeight: 1.5,
-        fillColor: phase === 'ACTION' ? '#dc2626' : (phase === 'ACTION_TAKEN' || phase === 'RESOLVED') ? '#059669' : '#2563eb',
-        fillOpacity: 0.08,
-        map: map
-      });
-
-      // 2. River Line (flood source)
-      let riverColor = '#161b22'; // default dark
-      if (phase === 'RISING') riverColor = '#2563eb';
-      if (phase === 'WATCH') riverColor = '#1d4ed8';
-      if (phase === 'ACTION' || phase === 'ACTION_TAKEN') riverColor = '#1e40af';
-
-      new window.google.maps.Polyline({
-        path: riverLine,
-        geodesic: true,
-        strokeColor: riverColor,
-        strokeOpacity: 1.0,
-        strokeWeight: 6,
-        map: map
-      });
-
-      // 3. Flood Pathway Polyline (pathway activation)
-      let pathwayColor = 'transparent';
-      let pathwayWeight = 0;
-      if (phase === 'WATCH') {
-        pathwayColor = '#d97706'; // watch amber
-        pathwayWeight = 3;
-      } else if (phase === 'ACTION' || phase === 'ACTION_TAKEN') {
-        pathwayColor = '#b45309'; // action red/amber
-        pathwayWeight = 4;
-      } else if (phase === 'RESOLVED') {
-        pathwayColor = '#047857'; // green resolved
-        pathwayWeight = 3;
-      }
-
-      if (pathwayWeight > 0) {
-        new window.google.maps.Polyline({
-          path: floodPathway,
-          geodesic: true,
-          strokeColor: pathwayColor,
+      // 1. Site Boundary Polygon
+      if (siteBoundary && siteBoundary.length > 0) {
+        new window.google.maps.Polygon({
+          paths: siteBoundary,
+          strokeColor: '#3d4f66',
           strokeOpacity: 0.8,
-          strokeWeight: pathwayWeight,
+          strokeWeight: 1.5,
+          fillColor: phase === 'ACTION' ? '#dc2626' : (phase === 'ACTION_TAKEN' || phase === 'RESOLVED') ? '#059669' : '#2563eb',
+          fillOpacity: 0.08,
           map: map
         });
       }
 
-      // 4. Object Markers
-      objects.forEach(obj => {
-        const isSelected = selectedId === obj.id;
-        
-        let markerColor = '#1e293b'; // default grey
-        let scale = 6;
-        if (isSelected) {
-          markerColor = '#3b82f6';
-          scale = 8;
-        } else if (phase === 'RISING' && obj.id === 'river') {
-          markerColor = '#fbbf24'; // active warning
-          scale = 7;
-        } else if (phase === 'WATCH' && obj.id === 'drainage') {
-          markerColor = '#fbbf24';
-          scale = 7;
-        } else if (phase === 'ACTION' && obj.id === 'loadingBay') {
-          markerColor = '#f87171'; // critical threat
-          scale = 8;
+      // 2. River Line
+      if (riverLine && riverLine.length > 0) {
+        let riverColor = '#161b22';
+        if (phase === 'RISING') riverColor = '#2563eb';
+        if (phase === 'WATCH') riverColor = '#1d4ed8';
+        if (phase === 'ACTION' || phase === 'ACTION_TAKEN') riverColor = '#1e40af';
+
+        new window.google.maps.Polyline({
+          path: riverLine,
+          geodesic: true,
+          strokeColor: riverColor,
+          strokeOpacity: 1.0,
+          strokeWeight: 6,
+          map: map
+        });
+      }
+
+      // 3. Flood Pathway Polyline
+      if (floodPathway && floodPathway.length > 0) {
+        let pathwayColor = 'transparent';
+        let pathwayWeight = 0;
+        if (phase === 'WATCH') {
+          pathwayColor = '#d97706';
+          pathwayWeight = 3;
+        } else if (phase === 'ACTION' || phase === 'ACTION_TAKEN') {
+          pathwayColor = '#b45309';
+          pathwayWeight = 4;
+        } else if (phase === 'RESOLVED') {
+          pathwayColor = '#047857';
+          pathwayWeight = 3;
         }
 
-        const marker = new window.google.maps.Marker({
-          position: obj.coord,
-          map: map,
-          title: `${obj.name} (${obj.role})`,
-          icon: {
-            path: window.google.maps.SymbolPath.CIRCLE,
-            scale: scale,
-            fillColor: markerColor,
-            fillOpacity: 1,
-            strokeColor: isSelected ? '#ffffff' : '#8892a4',
-            strokeWeight: isSelected ? 2 : 1
-          }
-        });
+        if (pathwayWeight > 0) {
+          new window.google.maps.Polyline({
+            path: floodPathway,
+            geodesic: true,
+            strokeColor: pathwayColor,
+            strokeOpacity: 0.8,
+            strokeWeight: pathwayWeight,
+            map: map
+          });
+        }
+      }
 
-        marker.addListener('click', () => {
-          onMarkerClick(obj.id);
+      // 4. Object Markers
+      if (objects && objects.length > 0) {
+        objects.forEach(obj => {
+          const isSelected = selectedId === obj.id;
+          
+          let markerColor = '#1e293b';
+          let scale = 6;
+          
+          const activeThreatNode = {
+            RISING: 'river',
+            WATCH: 'drainage',
+            ACTION: 'loadingBay',
+            ACTION_TAKEN: 'loadingBay'
+          }[phase] || null;
+
+          if (isSelected) {
+            markerColor = '#3b82f6';
+            scale = 8;
+          } else if (activeThreatNode === obj.id) {
+            markerColor = phase === 'ACTION' ? '#f87171' : '#fbbf24';
+            scale = 7;
+          }
+
+          const marker = new window.google.maps.Marker({
+            position: obj.coord,
+            map: map,
+            title: `${obj.name} (${obj.role})`,
+            icon: {
+              path: window.google.maps.SymbolPath.CIRCLE,
+              scale: scale,
+              fillColor: markerColor,
+              fillOpacity: 1,
+              strokeColor: isSelected ? '#ffffff' : '#8892a4',
+              strokeWeight: isSelected ? 2 : 1
+            }
+          });
+
+          marker.addListener('click', () => {
+            onMarkerClick(obj.id);
+          });
         });
-      });
+      }
     };
 
     return () => {
-      // Cleanup global callback safely
       delete window.initGoogleMap;
     };
-  }, [phase, selectedId]);
+  }, [phase, selectedId, siteBoundary, riverLine, floodPathway, objects, setMapInstance, setProviderType, onMarkerClick]);
 
   return (
     <div className="schematic-box">
