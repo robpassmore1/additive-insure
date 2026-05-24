@@ -168,7 +168,7 @@ export default function GoogleMapProvider() {
         <div className="card-label" style={{ margin: 0 }}>Google Maps Interface</div>
         <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>GIS Overlays Active</div>
       </div>
-      <div ref={mapRef} style={{ width: '100%', height: '170px', borderRadius: '6px', background: '#090d13' }}></div>
+      <div ref={mapRef} style={{ width: '100%', height: '450px', borderRadius: '6px', background: '#090d13' }}></div>
     </div>
   );
 }
